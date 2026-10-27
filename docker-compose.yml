@@ -1,0 +1,22 @@
+services:
+  ai-radar:
+    build: .
+    restart: unless-stopped
+    init: true
+    env_file: .env
+    environment:
+      DATA_DIR: /data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ai_radar_data:/data
+      - ./sources.json:/app/sources.json:ro
+    healthcheck:
+      test: ["CMD", "python", "app.py", "health"]
+      interval: 2m
+      timeout: 10s
+      retries: 3
+      start_period: 1m
+
+volumes:
+  ai_radar_data:

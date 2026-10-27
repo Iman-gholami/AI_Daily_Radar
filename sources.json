@@ -1,0 +1,115 @@
+{
+  "news_feeds": [
+    {
+      "name": "OpenAI",
+      "url": "https://openai.com/news/rss.xml",
+      "allowed_hosts": [
+        "openai.com",
+        "www.openai.com"
+      ]
+    },
+    {
+      "name": "Anthropic News (unofficial feed, official articles)",
+      "url": "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_anthropic_news.xml",
+      "allowed_hosts": [
+        "anthropic.com",
+        "www.anthropic.com"
+      ]
+    },
+    {
+      "name": "Anthropic Research (unofficial feed, official articles)",
+      "url": "https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_anthropic_research.xml",
+      "allowed_hosts": [
+        "anthropic.com",
+        "www.anthropic.com"
+      ]
+    },
+    {
+      "name": "Google DeepMind",
+      "url": "https://deepmind.google/blog/rss.xml",
+      "allowed_hosts": [
+        "deepmind.google",
+        "blog.google"
+      ]
+    },
+    {
+      "name": "Hugging Face",
+      "url": "https://huggingface.co/blog/feed.xml",
+      "allowed_hosts": [
+        "huggingface.co"
+      ]
+    },
+    {
+      "name": "Google AI",
+      "url": "https://blog.google/technology/ai/rss/",
+      "allowed_hosts": [
+        "blog.google"
+      ]
+    },
+    {
+      "name": "Claude Code changelog",
+      "url": "https://code.claude.com/docs/en/changelog/rss.xml",
+      "allowed_hosts": [
+        "code.claude.com"
+      ]
+    },
+    {
+      "name": "Mistral AI",
+      "url": "https://mistral.ai/news/rss",
+      "allowed_hosts": [
+        "mistral.ai",
+        "www.mistral.ai"
+      ]
+    },
+    {
+      "name": "NVIDIA Generative AI",
+      "url": "https://developer.nvidia.com/blog/category/generative-ai/feed/",
+      "allowed_hosts": [
+        "developer.nvidia.com"
+      ]
+    }
+  ],
+  "youtube_channels": [
+    {
+      "name": "OpenAI",
+      "id": "UCXZCJLdBC09xxGZ6gcdrc6A"
+    },
+    {
+      "name": "Anthropic",
+      "id": "UCrDwWp7EBBv4NwvScIpBDOA"
+    },
+    {
+      "name": "Google DeepMind",
+      "id": "UCP7jMXSY2xbc3KCAE0MHQ-A"
+    },
+    {
+      "name": "AI Explained",
+      "id": "UCNJ1Ymd5yFuUPtn21xtRbbw"
+    },
+    {
+      "name": "Andrej Karpathy",
+      "id": "UCXUPKJO5MZQN11PqgIvyuvQ"
+    },
+    {
+      "name": "Yannic Kilcher",
+      "id": "UCZHmQk67mSJgfCCTn7xBfew"
+    },
+    {
+      "name": "The Cognitive Revolution",
+      "id": "UCjNRVMBVI30Sak_p6HRWhIA"
+    },
+    {
+      "name": "The Artificial Intelligence Show",
+      "id": "UCdHpbfqjELZmhqY3k0ELGcQ"
+    }
+  ],
+  "youtube_search_queries": [
+    "OpenAI|Anthropic|Claude LLM",
+    "LLM agents interview",
+    "Claude Code|Codex coding agent",
+    "AI security LLM",
+    "open source LLM release",
+    "Google Gemini model release",
+    "LLM RAG tutorial"
+  ]
+}

@@ -1,0 +1,75 @@
+name: AI Daily Radar
+
+on:
+  schedule:
+    # 09:05 and a retry at 11:05 in Asia/Tehran (UTC+03:30).
+    - cron: '35 5 * * *'
+    - cron: '35 7 * * *'
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: 'check: test connections; preview: inspect report; publish: send the report'
+        type: choice
+        options: [check, preview, publish]
+        default: check
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ai-daily-radar-state
+  cancel-in-progress: false
+
+jobs:
+  radar:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      TZ: Asia/Tehran
+      DATA_DIR: ${{ github.workspace }}/data
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      LLM_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      LLM_BASE_URL: https://openrouter.ai/api/v1
+      LLM_MODEL: openrouter/free
+      FREE_ONLY: 'true'
+      YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+      SUPADATA_API_KEY: ${{ secrets.SUPADATA_API_KEY }}
+      MAX_ARTICLES: ${{ vars.MAX_ARTICLES || '6' }}
+      MAX_VIDEOS: ${{ vars.MAX_VIDEOS || '2' }}
+      MAX_TRANSCRIPT_CHUNKS: ${{ vars.MAX_TRANSCRIPT_CHUNKS || '5' }}
+      MAX_LLM_CALLS_PER_DAY: ${{ vars.MAX_LLM_CALLS_PER_DAY || '32' }}
+      SUPADATA_DAILY_CAP: ${{ vars.SUPADATA_DAILY_CAP || '3' }}
+      SUPADATA_MONTHLY_CAP: ${{ vars.SUPADATA_MONTHLY_CAP || '75' }}
+      RUN_OPERATION: ${{ inputs.operation || 'publish' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Restore previous state
+        id: restore
+        uses: actions/cache/restore@v4
+        with:
+          path: data/radar.sqlite3*
+          key: radar-state-v1-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            radar-state-v1-
+      - name: Check, preview, or publish
+        run: |
+          case "$RUN_OPERATION" in
+            check) python app.py check ;;
+            preview) python app.py preview ;;
+            publish) python app.py once ;;
+            *) echo 'Unsupported operation'; exit 1 ;;
+          esac
+      - name: Save state for next run
+        if: always() && steps.restore.outcome == 'success'
+        uses: actions/cache/save@v4
+        with:
+          path: data/radar.sqlite3*
+          key: radar-state-v1-${{ github.run_id }}-${{ github.run_attempt }}
