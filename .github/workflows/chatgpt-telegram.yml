@@ -1,0 +1,74 @@
+name: ChatGPT reports to Telegram
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'channel_reports/*.json'
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: 'check validates the channel without sending; publish sends an existing report'
+        type: choice
+        options: [check, publish]
+        default: check
+        required: true
+      report_date:
+        description: 'For publish only: report date in YYYY-MM-DD format'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: chatgpt-telegram-delivery
+  cancel-in-progress: false
+
+jobs:
+  relay:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      TZ: Asia/Tehran
+      DATA_DIR: ${{ github.workspace }}/data
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      INPUT_OPERATION: ${{ inputs.operation || 'publish' }}
+      INPUT_REPORT_DATE: ${{ inputs.report_date || '' }}
+      PUSH_BEFORE: ${{ github.event.before || '' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Resolve report
+        id: resolve
+        run: python telegram_bridge.py resolve >> "$GITHUB_OUTPUT"
+      - name: Check Telegram without sending
+        if: steps.resolve.outputs.operation == 'check'
+        run: python telegram_bridge.py check
+      - name: Restore delivery progress
+        id: restore
+        if: steps.resolve.outputs.operation == 'publish'
+        uses: actions/cache/restore@v4
+        with:
+          path: data/telegram_bridge.sqlite3*
+          key: chatgpt-telegram-v1-${{ steps.resolve.outputs.report_date }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            chatgpt-telegram-v1-${{ steps.resolve.outputs.report_date }}-
+      - name: Send unsent posts
+        if: steps.resolve.outputs.operation == 'publish'
+        env:
+          REPORT_DAY: ${{ steps.resolve.outputs.report_date }}
+        run: python telegram_bridge.py publish "$REPORT_DAY"
+      - name: Save delivery progress
+        if: always() && steps.restore.outcome == 'success' && steps.resolve.outputs.operation == 'publish'
+        uses: actions/cache/save@v4
+        with:
+          path: data/telegram_bridge.sqlite3*
+          key: chatgpt-telegram-v1-${{ steps.resolve.outputs.report_date }}-${{ github.run_id }}-${{ github.run_attempt }}

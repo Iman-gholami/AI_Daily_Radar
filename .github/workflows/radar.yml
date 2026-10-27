@@ -23,7 +23,9 @@ concurrency:
 
 jobs:
   radar:
-    if: github.ref == 'refs/heads/main'
+    # Keep the original standalone mode available manually; only opt in to
+    # its separate scheduler if the owner explicitly enables it.
+    if: github.ref == 'refs/heads/main' && (github.event_name != 'schedule' || vars.ENABLE_LEGACY_RADAR == 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
